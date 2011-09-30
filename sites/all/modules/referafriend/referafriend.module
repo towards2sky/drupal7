@@ -1,0 +1,208 @@
+<?php
+
+
+function referafriend_menu() {
+ $items = array();
+ $items['admin/config/system/referafriend'] = array(
+   'title' => 'Refer a Friend setting',
+   'description'=>t('E-mail template setting.'),
+   'page callback' => 'drupal_get_form',
+   'type'=>MENU_NORMAL_ITEM,
+   'page arguments' => array('referafriend_settings_form'),
+   'access callback' => TRUE,
+   'expanded' => TRUE,
+ );
+
+ return $items;
+}
+
+
+function referafriend_block_info() {
+  // This example comes from node.module.
+  $blocks['referafriend'] = array(
+    'info' => t('Refer A friend'), 
+    'cache' => DRUPAL_NO_CACHE,
+  );
+
+  return $blocks;
+}
+
+function referafriend_block_view($delta = '') {
+  // This example is adapted from node.module.
+  $block = array();
+
+  switch ($delta) {
+    case 'referafriend':
+      $block['subject'] = t('Refer A Friend');
+      $block['content'] = drupal_get_form('refer_a_friend_form');
+      break;
+     }
+  return $block;
+}
+
+
+function refer_a_friend_form($form,&$form_state) {
+
+$form['description'] = array(
+    '#type' => 'item',
+    '#title' => t('Refer this site to friend.'),
+	'#weight' => 1,
+  );
+  $form['refer_name'] =  array(
+    '#type' => 'textfield', 
+    '#title' => t("Name:"), 
+	//'#default_value' =>'',
+	'#size'=>'15',
+    '#weight' => 2,
+  );
+   $form['refer_mail_address'] =  array(
+    '#type' => 'textfield', 
+    '#title' => t("Email:"), 
+	//'#default_value' =>'',
+	'#size'=>'25',
+    '#weight' => 3,
+  );
+  $form['submit'] =  array(
+    '#type' => 'submit', 
+    '#value' => t("Send"), 
+    '#weight' => 7,
+  );
+ return $form;
+}
+
+function refer_a_friend_form_submit($form,&$form_state){
+	$mailtouser='rajeshsaini@ballisticlearning.com';
+	//$to=$form_state['values']['refer_mail_address'];
+	$fromname=variable_get('refer_mail_from', t('Leo pharma'));
+	$from=" $fromname <".variable_get('site_mail','info@leopharmaacademy.com').">";
+	$replacements['friend_name']=$form_state['values']['refer_name'];
+	$patterns=array('[FRIEND_NAME]');
+	
+	
+	$subject=variable_get('refer_subject', 'Invitation');
+	$header=variable_get('refer_message',t('Hi [FRIEND_NAME]'));
+		if(count($header)>1){ 
+		$refer_message=$header['value'];
+		}else{
+		$refer_message=$header;
+		}
+
+   	$body=$refer_message;
+	
+   // drupal_mail('referafriend', 'refer_frriend_mail', $to, NULL,$params,$from);
+    //drupal_set_message('Mail has been sent.');
+	
+	
+		//	$frommsg=$form_state['values']['from'];
+		//$params['subject'] =$form_state['values']['subject'];
+		//$params['header'] =t($form_state['values']['header']['value']);
+		//$params['body'] =t($form_state['values']['body']['value']);
+		//$params['footer'] =t($form_state['values']['footer']['value']);
+
+	//	$subject =$params['subject'];
+		//$msg =$params['header'].$params['body'].$params['footer'];
+		
+		$messagebody=array();
+		$messagebody[]=str_replace($patterns,$replacements,$body);
+		
+
+		$my_module = 'referafriend';
+		$my_mail_token = 'refer_frriend_mail';
+
+		
+$message = array(
+	'id' => $my_module . '_' . $my_mail_token,
+	'to' => $mailtouser,
+	'subject' => $subject,
+	'body' =>$messagebody,
+	'headers' => array(
+	'From' => $from, 
+	'Sender' => $from, 
+	'Return-Path' => $from,
+	'MIME-Version' => 'MIME-Version: 1.0',
+	'Content-Type'=> 'text/html; charset=UTF-8; format=flowed',
+		),
+	);
+	
+	$system = drupal_mail_system('mail_blast', 'mail_user_blast');
+	
+	$message = $system->format($message);
+
+	if($system->mail($message)) {
+	drupal_set_message("You have beed sent");
+	}
+
+}
+
+
+function referafriend_mail($key, &$message, $params) {
+
+  global $base_url,$user;
+
+	switch ($key) {
+    case 'refer_frriend_mail':
+    $subject=variable_get('refer_subject', 'Invitation');
+	
+		$header=variable_get('refer_message',t('Hi [FRIEND_NAME]'));
+		if(count($header)>1){ 
+		$refer_message=$header['value'];
+		}else{
+		$refer_message=$header;
+		}
+
+   	$body=$refer_message;
+    $patterns=array('[FRIEND_NAME]');
+    $replacements=array($params['friend_name']);
+    
+	$message['body'][]=str_replace($patterns,$replacements,$body);
+    
+	$message['subject']=str_replace($patterns,$replacements,$subject);
+	
+	
+  }
+
+}
+
+
+function referafriend_settings_form($form,&$form_state) {
+
+ $form['description'] = array(
+    '#type' => 'item',
+    '#title' => t('Refer a Friend Template Setting:'),
+	'#weight' => 1,
+  );
+  
+  $from=variable_get('refer_mail_from', t('Leo pharma'));
+  $form['refer_mail_from'] =  array(
+    '#type' => 'textfield', 
+    '#title' => t("From:"), 
+	'#default_value' =>$from,
+    '#weight' => 2,
+  );
+  
+  $subject=variable_get('refer_subject', 'Invitation');
+  $form['refer_subject'] =  array(
+    '#type' => 'textfield', 
+    '#title' => t("Subject:"), 
+	'#default_value' =>$subject,
+    '#weight' => 3,
+  );
+  
+$header=variable_get('refer_message',t('Hi [FRIEND_NAME]'));
+if(count($header)>1){ 
+$refer_message=$header['value'];
+}else{
+$refer_message=$header;
+}
+
+  $form['refer_message'] =  array(
+    '#type' => 'text_format', 
+    '#title' => t("Refer Message Template:"),
+	'#default_value' =>$refer_message,
+    '#rows' => 5,
+    '#weight' => 4,
+  );
+ return system_settings_form($form);
+
+}
+

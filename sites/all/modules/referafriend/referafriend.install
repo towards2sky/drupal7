@@ -1,0 +1,7 @@
+<?php
+function referafriend_uninstall() {
+variable_del('refer_message');
+variable_del('refer_subject');
+variable_del('refer_mail_from');
+}
+

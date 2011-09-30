@@ -1,0 +1,55 @@
+<?php
+
+function test_friend_block_info() {
+  // This example comes from node.module.
+  $blocks['referafriend_test_friend'] = array(
+    'info' => t('Refer A friend test_friend'), 
+    'cache' => DRUPAL_NO_CACHE,
+  );
+  return $blocks;
+}
+
+function test_friend_block_view($delta = '') {
+  // This example is adapted from node.module.
+  $block = array();
+
+  switch ($delta) {
+    case 'refertofriend_test_friend':
+      $block['subject'] = t('Refer A Friend test_friend');
+      $block['content'] = t('refer_a_friend_test_friend');
+      break;
+     }
+  return $block;
+}
+
+
+function refer_a_friend_test_friend($form,&$form_state) {
+
+$form['description'] = array(
+    '#type' => 'item',
+    '#title' => t('Refer this site to friend.'),
+	'#weight' => 1,
+  );
+  $form['refer_name'] =  array(
+    '#type' => 'textfield', 
+    '#title' => t("Name:"), 
+	//'#default_value' =>'',
+	'#size'=>'15',
+    '#weight' => 2,
+  );
+   $form['refer_mail_address'] =  array(
+    '#type' => 'textfield', 
+    '#title' => t("Email:"), 
+	//'#default_value' =>'',
+	'#size'=>'25',
+    '#weight' => 3,
+  );
+  $form['submit'] =  array(
+    '#type' => 'submit', 
+    '#value' => t("Send"), 
+    '#weight' => 7,
+  );
+ return $form;
+}
+
+
